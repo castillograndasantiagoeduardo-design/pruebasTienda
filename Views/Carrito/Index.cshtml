@@ -1,0 +1,105 @@
+﻿@model PruebaBackendTienda.Models.ViewModels.CarritoViewModel
+@{
+    ViewData["Title"] = "Mi Carrito";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Carrito – SenaPay</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        th {
+            background: #39A900;
+            color: white;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #39A900;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Mi Carrito</h1>
+    <p><a href="/Productos">← Seguir comprando</a></p>
+
+    @if (TempData["Error"] != null)
+    {
+        <p style="color:red; font-weight:bold;">⚠️ @TempData["Error"]</p>
+    }
+
+    @if (!Model.Items.Any())
+    {
+        <p>Tu carrito está vacío.</p>
+    }
+    else
+    {
+        <table>
+            <tr>
+                <th>Producto</th>
+                <th>Precio Unit.</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.NombreProducto</td>
+                    <td>$@item.PrecioUnitario.ToString("N2")</td>
+                    <td>@item.Cantidad</td>
+                    <td>$@item.Subtotal.ToString("N2")</td>
+                    <td>
+                        <form method="post" action="/Carrito/Eliminar">
+                            <input type="hidden" name="idProducto" value="@item.Id_Producto" />
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="3"><strong>TOTAL</strong></td>
+                <td colspan="2"><strong>$@Model.Total.ToString("N2")</strong></td>
+            </tr>
+        </table>
+
+        <br />
+        <form method="post" action="/Transaccion/Procesar">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn" style="font-size:16px; padding:12px 24px;">
+                ✅ Confirmar Compra con SenaPay
+            </button>
+        </form>
+
+        <form method="post" action="/Carrito/Vaciar" style="display:inline; margin-left:10px;">
+            <button type="submit" class="btn btn-danger">🗑️ Vaciar Carrito</button>
+        </form>
+    }
+</body>
+</html>

@@ -1,0 +1,59 @@
+﻿@model IEnumerable<PruebaBackendTienda.Models.Domain.Producto>
+@{
+    ViewData["Title"] = "Cafetería SenaPay";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Cafetería – SenaPay</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #39A900; color: white; }
+        .btn { padding: 6px 12px; background: #39A900; color: white; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <h1>☕ Cafetería Virtual</h1>
+    <p><a href="/Carrito" class="btn">🛒 Ver Carrito</a></p>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <p style="color:green;">@TempData["Mensaje"]</p>
+    }
+
+    <table>
+        <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Tienda</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acción</th>
+        </tr>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.Nombre_Producto</td>
+                <td>@p.Categoria?.Nombre_Categoria</td>
+                <td>@p.Tienda?.Nombre</td>
+                <td>$@p.Precio.ToString("N2")</td>
+                <td>@p.Stock</td>
+                <td>
+                    <form method="post" action="/Carrito/Agregar">
+                        <input type="hidden" name="idProducto" value="@p.Id_Producto" />
+                        <input type="hidden" name="nombreProducto" value="@p.Nombre_Producto" />
+                        <input type="hidden" name="precio" value="@p.Precio" />
+                        <input type="number" name="cantidad" value="1" min="1" max="@p.Stock" style="width:50px" />
+                        <button type="submit" class="btn">+ Agregar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
+```
