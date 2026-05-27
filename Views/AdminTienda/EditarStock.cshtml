@@ -1,5 +1,117 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model PruebaBackendTienda.Models.ViewModels.EditarStockViewModel
+
 @{
+    ViewData["Title"] = "Modificar Stock";
+}
+
+<div class="container py-4" style="max-width:480px">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h5 class="mb-0 fw-bold">Modificar Stock</h5>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            @* Info del producto *@
+            <div class="alert alert-light border mb-4 py-3">
+                <div class="fw-semibold fs-6">@Model.NombreProducto</div>
+                <div class="text-muted small mt-1">
+                    Stock actual:
+                    <span class="badge @(Model.StockActual <= 0 ? "bg-danger" : Model.StockActual <= 5 ? "bg-warning text-dark" : "bg-success")">
+                        @Model.StockActual unidades
+                    </span>
+                </div>
+            </div>
+
+            <form asp-action="EditarStock" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id_Producto" type="hidden" />
+                <input asp-for="NombreProducto" type="hidden" />
+                <input asp-for="StockActual" type="hidden" />
+
+                @* Operación *@
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Operación</label>
+                    <div class="d-flex gap-2">
+                        <div class="form-check form-check-inline flex-fill">
+                            <input class="form-check-input" type="radio" asp-for="Operacion"
+                                   id="opSumar" value="Sumar" checked />
+                            <label class="form-check-label text-success fw-semibold" for="opSumar">
+                                ➕ Sumar
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline flex-fill">
+                            <input class="form-check-input" type="radio" asp-for="Operacion"
+                                   id="opRestar" value="Restar" />
+                            <label class="form-check-label text-danger fw-semibold" for="opRestar">
+                                ➖ Restar
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline flex-fill">
+                            <input class="form-check-input" type="radio" asp-for="Operacion"
+                                   id="opFijar" value="Fijar" />
+                            <label class="form-check-label text-primary fw-semibold" for="opFijar">
+                                📌 Fijar
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Operacion" class="text-danger small"></span>
+                </div>
+
+                @* Cantidad *@
+                <div class="mb-3">
+                    <label asp-for="Cantidad" class="form-label fw-semibold">Cantidad</label>
+                    <input asp-for="Cantidad" type="number" min="1" class="form-control form-control-lg"
+                           placeholder="0" oninput="calcularResultado()" />
+                    <span asp-validation-for="Cantidad" class="text-danger small"></span>
+                </div>
+
+                @* Preview del resultado *@
+                <div class="alert alert-info py-2 mb-4" id="previewResultado">
+                    <small class="text-muted">Ingresa una cantidad para ver el resultado.</small>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1"></i>Aplicar cambio
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        const stockActual = @Model.StockActual;
+
+        function calcularResultado() {
+            const cantidad = parseInt(document.querySelector('[name="Cantidad"]').value) || 0;
+            const operacion = document.querySelector('[name="Operacion"]:checked')?.value;
+            const div = document.getElementById('previewResultado');
+
+            let resultado;
+            if (operacion === 'Sumar')       resultado = stockActual + cantidad;
+            else if (operacion === 'Restar') resultado = Math.max(0, stockActual - cantidad);
+            else if (operacion === 'Fijar')  resultado = cantidad;
+
+            if (cantidad > 0) {
+                div.innerHTML = `Stock resultante: <strong>${stockActual} → ${resultado} unidades</strong>`;
+            } else {
+                div.innerHTML = `<small class="text-muted">Ingresa una cantidad para ver el resultado.</small>`;
+            }
+        }
+
+        // Recalcular al cambiar la operación
+        document.querySelectorAll('[name="Operacion"]').forEach(r =>
+            r.addEventListener('change', calcularResultado)
+        );
+    </script>
 }

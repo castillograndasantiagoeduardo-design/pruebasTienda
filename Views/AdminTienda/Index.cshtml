@@ -1,5 +1,186 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<PruebaBackendTienda.Models.ViewModels.AdminProductoViewModel>
+
 @{
+    ViewData["Title"] = "Admin — Panel de Tienda";
+    int total = Model.Count();
+    int activos = Model.Count(p => p.Activo);
+    int sinStock = Model.Count(p => p.Stock <= 0 && p.Activo);
+    int stockBajo = Model.Count(p => p.Stock > 0 && p.Stock <= 5 && p.Activo);
+}
+
+<div class="container-fluid py-4">
+
+    @* ── Header ─────────────────────────────────────────────────── *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-0 fw-bold">🏪 Panel de Administración — Tienda</h4>
+            <small class="text-muted">Gestión de inventario y productos</small>
+        </div>
+        <a asp-action="Crear" class="btn btn-success px-4">
+            <i class="bi bi-plus-circle me-1"></i> Agregar Producto
+        </a>
+    </div>
+
+    @* ── Alertas ─────────────────────────────────────────────────── *@
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* ── Tarjetas de resumen ──────────────────────────────────────── *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 bg-light text-center py-3">
+                <div class="fs-2 fw-bold text-primary">@total</div>
+                <div class="text-muted small">Total productos</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 bg-light text-center py-3">
+                <div class="fs-2 fw-bold text-success">@activos</div>
+                <div class="text-muted small">Activos</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 bg-light text-center py-3">
+                <div class="fs-2 fw-bold text-warning">@stockBajo</div>
+                <div class="text-muted small">Stock bajo (≤5)</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 bg-light text-center py-3">
+                <div class="fs-2 fw-bold text-danger">@sinStock</div>
+                <div class="text-muted small">Sin stock</div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Tabla de productos ───────────────────────────────────────── *@
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-semibold">Inventario de Productos</span>
+            <input type="text" id="buscador" class="form-control form-control-sm w-auto"
+                   placeholder="🔍 Buscar producto..." style="min-width:200px" />
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tablaProductos">
+                <thead class="table-light">
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th class="text-end">Precio</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr class="@(!p.Activo ? "table-secondary text-muted" : "")">
+                            <td>
+                                @if (!string.IsNullOrEmpty(p.ImagenUrl))
+                                {
+                                    <img src="@p.ImagenUrl" alt="@p.Nombre"
+                                         style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />
+                                }
+                                else
+                                {
+                                    <div style="width:48px;height:48px;background:#f0f0f0;border-radius:8px;
+                                                display:flex;align-items:center;justify-content:center;">
+                                        <i class="bi bi-image text-muted"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@p.Nombre</div>
+                                @if (!string.IsNullOrEmpty(p.Descripcion))
+                                {
+                                    <small class="text-muted">@(p.Descripcion.Length > 50 ? p.Descripcion[..50] + "…" : p.Descripcion)</small>
+                                }
+                            </td>
+                            <td><span class="badge bg-secondary">@(p.NombreCategoria ?? "Sin categoría")</span></td>
+                            <td class="text-end fw-semibold">$@p.Precio.ToString("N2")</td>
+                            <td class="text-center">
+                                <span class="badge bg-@p.BadgeStock">
+                                    @p.Stock — @p.TextoStock
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if (p.Activo)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-eye"></i> Visible
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border">
+                                        <i class="bi bi-eye-slash"></i> Oculto
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-1 justify-content-center flex-wrap">
+
+                                    @* Editar stock *@
+                                    <a asp-action="EditarStock" asp-route-id="@p.Id_Producto"
+                                       class="btn btn-sm btn-outline-primary" title="Modificar stock">
+                                        <i class="bi bi-box-seam"></i>
+                                    </a>
+
+                                    @* Activar / Desactivar *@
+                                    <form asp-action="ToggleActivo" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id_Producto" />
+                                        <input type="hidden" name="activo" value="@(!p.Activo ? "true" : "false")" />
+                                        <button type="submit"
+                                                class="btn btn-sm @(p.Activo ? "btn-outline-warning" : "btn-outline-success")"
+                                                title="@(p.Activo ? "Desactivar" : "Activar")">
+                                            <i class="bi bi-@(p.Activo ? "pause-circle" : "play-circle")"></i>
+                                        </button>
+                                    </form>
+
+                                    @* Eliminar permanente *@
+                                    <form asp-action="Eliminar" method="post" class="d-inline"
+                                          onsubmit="return confirm('¿Eliminar permanentemente @p.Nombre? Esta acción no se puede deshacer.')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id_Producto" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No hay productos registrados.
+                <a asp-action="Crear">Agrega el primero</a>.
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Búsqueda en tiempo real
+        document.getElementById('buscador').addEventListener('input', function () {
+            const texto = this.value.toLowerCase();
+            document.querySelectorAll('#tablaProductos tbody tr').forEach(fila => {
+                fila.style.display = fila.textContent.toLowerCase().includes(texto) ? '' : 'none';
+            });
+        });
+    </script>
 }
