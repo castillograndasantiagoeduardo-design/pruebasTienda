@@ -54,6 +54,8 @@ builder.Services.AddSession(options =>
 // ═══════════════════════════════════════════════════════
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+
 var app = builder.Build();
 
 // ── Pipeline de Middleware ────────────────────────────────────────────────────

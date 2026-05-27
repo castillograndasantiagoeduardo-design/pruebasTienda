@@ -8,8 +8,58 @@ namespace PruebaBackendTienda.Data.Repositories
     /// Implementación concreta del repositorio de productos.
     /// Aquí está el único lugar donde escribimos LINQ / EF Core para Productos.
     /// </summary>
+    /// 
     public class ProductoRepository : IProductoRepository
     {
+        public async Task<IEnumerable<Producto>> ObtenerTodosAdminAsync()
+        {
+            return await _context.Productos
+                .Include(p => p.Categoria)
+                .OrderBy(p => p.Nombre)
+                .ToListAsync();
+        }
+
+        // Crear un producto nuevo
+        public async Task CrearAsync(Producto producto)
+        {
+            producto.Activo = true;
+            _context.Productos.Add(producto);
+            await _context.SaveChangesAsync();
+        }
+
+        // Actualizar solo el stock (no toca precio ni nombre)
+        public async Task ActualizarStockAsync(int idProducto, int nuevoStock)
+        {
+            var producto = await _context.Productos.FindAsync(idProducto);
+            if (producto != null)
+            {
+                producto.Stock = nuevoStock;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Activar o desactivar (soft delete recomendado)
+        public async Task ActivarDesactivarAsync(int idProducto, bool activo)
+        {
+            var producto = await _context.Productos.FindAsync(idProducto);
+            if (producto != null)
+            {
+                producto.Activo = activo;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Eliminar permanente (úsalo con cuidado si hay transacciones relacionadas)
+        public async Task EliminarAsync(int idProducto)
+        {
+            var producto = await _context.Productos.FindAsync(idProducto);
+            if (producto != null)
+            {
+                _context.Productos.Remove(producto);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         private readonly ApplicationDbContext _context;
 
         // El DbContext se inyecta automáticamente por el contenedor de DI

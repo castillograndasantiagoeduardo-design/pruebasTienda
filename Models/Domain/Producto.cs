@@ -13,10 +13,16 @@
         public bool Estado { get; set; }             // true = activo, false = inactivo
         public int Id_Tienda { get; set; }
         public int Id_Categoria { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string? Descripcion { get; set; }
+        public string? ImagenUrl { get; set; }
+        public bool Activo { get; set; } = true;  // ← NUEVO
+
+        public Categoria? Categoria { get; set; }
 
         // Propiedades de navegación (EF Core las rellena automáticamente con .Include())
         public Tienda? Tienda { get; set; }
-        public Categoria? Categoria { get; set; }
+        
     }
 
 }
