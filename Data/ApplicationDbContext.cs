@@ -36,20 +36,25 @@ namespace PruebaBackendTienda.Data
             {
                 entity.ToTable("Productos");
                 entity.HasKey(p => p.Id_Producto);
+
+                entity.Property(p => p.Nombre).HasColumnName("Nombre").HasMaxLength(150).IsRequired();
+                entity.Property(p => p.ImagenUrl).HasColumnName("ImagenUrl");
                 entity.Property(p => p.Precio).HasColumnType("decimal(18,2)");
-                entity.Property(p => p.Nombre_Producto).HasMaxLength(150).IsRequired();
+                entity.Property(p => p.Stock);
+                entity.Property(p => p.Estado);
+                entity.Property(p => p.Activo);
+                entity.Property(p => p.Descripcion);
 
-                // Relación: Producto → Tienda (muchos a uno)
-                entity.HasOne(p => p.Tienda)
-                      .WithMany(t => t.Productos)
-                      .HasForeignKey(p => p.Id_Tienda)
-                      .OnDelete(DeleteBehavior.Restrict); // No borrar tienda si tiene productos
-
-                // Relación: Producto → Categoria (muchos a uno)
+                // ApplicationDbContext.cs — en la configuración de Producto
                 entity.HasOne(p => p.Categoria)
-                      .WithMany(c => c.Productos)
+                      .WithMany(c => c.Productos)       // ← referenciar la colección explícitamente
                       .HasForeignKey(p => p.Id_Categoria)
-                      .OnDelete(DeleteBehavior.Restrict);
+                      .HasConstraintName("FK_Productos_Categoria");
+
+                entity.HasOne(p => p.Tienda)
+                      .WithMany(t => t.Productos)       // ← igual aquí
+                      .HasForeignKey(p => p.Id_Tienda)
+                      .HasConstraintName("FK_Productos_Tienda");
             });
 
             // ── Tabla Detalle_Transaccion ──────────────────────────────────────

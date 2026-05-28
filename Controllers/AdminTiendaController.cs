@@ -40,7 +40,7 @@ namespace PruebaBackendTienda.Controllers
                 Nombre = p.Nombre,
                 Precio = p.Precio,
                 Stock = p.Stock,
-                NombreCategoria = p.Categoria?.Nombre,
+                NombreCategoria = p.Categoria?.Nombre_Categoria,
                 Descripcion = p.Descripcion,
                 ImagenUrl = p.ImagenUrl,
                 Activo = p.Activo
@@ -87,12 +87,24 @@ namespace PruebaBackendTienda.Controllers
                 Descripcion = vm.Descripcion,
                 ImagenUrl = rutaImagen,
                 Activo = true
+
+                Estado = "Disponible", // Ajusta según el texto que use tu columna Estado
+                Id_Tienda = 4
             };
 
             await _productoRepo.CrearAsync(producto);
             TempData["Exito"] = $"Producto '{vm.Nombre}' creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
+        catch (Exception ex)
+    {
+        // Si la base de datos rechaza el insert, el error se mostrará arriba en tu formulario
+        var mensajeError = ex.InnerException?.Message ?? ex.Message;
+        ModelState.AddModelError(string.Empty, $"Error en la Base de Datos: {mensajeError}");
+        
+        await CargarCategorias(); 
+        return View(vm);
+    }
 
         // ── GET /AdminTienda/EditarStock/5 ────────────────────────────
         public async Task<IActionResult> EditarStock(int id)

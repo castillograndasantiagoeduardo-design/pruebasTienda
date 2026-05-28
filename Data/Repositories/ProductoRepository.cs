@@ -74,7 +74,7 @@ namespace PruebaBackendTienda.Data.Repositories
                 .Include(p => p.Categoria)    // Trae también la categoría (JOIN)
                 .Include(p => p.Tienda)       // Trae también la tienda (JOIN)
                 .Where(p => p.Estado == true && p.Stock > 0)
-                .OrderBy(p => p.Nombre_Producto)
+                .OrderBy(p => p.Nombre)
                 .ToListAsync();
         }
 

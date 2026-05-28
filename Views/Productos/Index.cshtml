@@ -1060,7 +1060,7 @@
                         idx++;
 
                         <div class="card-produto"
-                             data-nombre="@p.Nombre_Producto?.ToLower()"
+                             data-nombre="@p.Nombre?.ToLower()"
                              data-cat="@p.Categoria?.Nombre_Categoria"
                              data-tienda="@p.Tienda?.Nombre?.ToLower()"
                              style="animation-delay: @(idx * 0.04)s">
@@ -1069,7 +1069,7 @@
                             <div class="card-thumb" style="background:@color;">@emoji</div>
 
                             <div class="card-body">
-                                <div class="card-name">@p.Nombre_Producto</div>
+                                <div class="card-name">@p.Nombre</div>
 
                                 <div class="card-meta">
                                     @if (p.Categoria != null)
@@ -1103,10 +1103,10 @@
                             <div class="card-footer">
                                 <form method="post" action="/Carrito/Agregar"
                                       class="add-form"
-                                      onsubmit="onAgregar(event, this, '@p.Nombre_Producto')">
+                                      onsubmit="onAgregar(event, this, '@p.Nombre')">
 
                                     <input type="hidden" name="idProducto" value="@p.Id_Producto" />
-                                    <input type="hidden" name="nombreProducto" value="@p.Nombre_Producto" />
+                                    <input type="hidden" name="nombreProducto" value="@p.Nombre" />
                                     <input type="hidden" name="precio" value="@p.Precio" />
 
                                     <!-- Control de cantidad con +/- -->

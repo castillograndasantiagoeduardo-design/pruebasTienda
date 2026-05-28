@@ -17,7 +17,7 @@ namespace PruebaBackendTienda.Data.Repositories
         }
 
         public async Task<IEnumerable<Categoria>> ObtenerTodasAsync()
-            => await _context.Categorias.OrderBy(c => c.Nombre).ToListAsync();
+            => await _context.Categorias.OrderBy(c => c.Nombre_Categoria).ToListAsync();
 
         public async Task<Categoria?> ObtenerPorIdAsync(int id)
             => await _context.Categorias.FindAsync(id);
